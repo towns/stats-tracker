@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Store } from '../store'
 import { BOX_COLUMNS, pct, type StatLine } from '../model/stats'
+import { formatMinutes } from '../model/playingTime'
 import { formatStat, perGame, record, seasonCsv, seasonSummary, type PlayerSeason } from '../model/season'
 
 type Mode = 'avg' | 'totals'
@@ -95,6 +96,8 @@ export default function SeasonView({ store, teamId }: { store: Store; teamId?: s
                   <th>#</th>
                   <th className="name">Player</th>
                   <th>GP</th>
+                  <th>MIN</th>
+                  <th title="Games below half-game playing time">Short</th>
                   {BOX_COLUMNS.map(([h]) => <th key={h}>{h}</th>)}
                 </tr>
               </thead>
@@ -104,6 +107,8 @@ export default function SeasonView({ store, teamId }: { store: Store; teamId?: s
                     <td>{p.player.number}</td>
                     <td className="name">{p.player.name}</td>
                     <td>{p.gp}</td>
+                    <td>{p.trackedGames ? formatMinutes(mode === 'avg' ? Number((p.minutes / p.trackedGames).toFixed(1)) : p.minutes) : '–'}</td>
+                    <td className={p.shortGames ? 'short-count' : ''}>{p.trackedGames ? p.shortGames : '–'}</td>
                     {cells(p.totals, p.gp)}
                   </tr>
                 ))}
@@ -113,12 +118,16 @@ export default function SeasonView({ store, teamId }: { store: Store; teamId?: s
                   <td />
                   <td className="name">Team</td>
                   <td>{s.gp}</td>
+                  <td />
+                  <td />
                   {cells(s.team, s.gp)}
                 </tr>
                 <tr className="opp-row">
                   <td />
                   <td className="name">Opponents</td>
                   <td>{s.gp}</td>
+                  <td />
+                  <td />
                   {cells(s.opponent, s.gp, true)}
                 </tr>
               </tfoot>

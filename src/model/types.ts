@@ -57,4 +57,18 @@ export interface Game {
   roster: Player[]
   events: GameEvent[]
   status: 'live' | 'final'
+  /** Length of each period in minutes (defaults to 6). */
+  periodMinutes?: number
+  /** Split each first-half quarter into two sub segments (defaults to true for quarters). */
+  splitFirstHalf?: boolean
+  /** Players on the floor for each segment, keyed by Segment.id. */
+  lineups?: Record<string, Id[]>
+}
+
+export interface Segment {
+  /** e.g. "1a", "1b", "3" */
+  id: string
+  period: number
+  label: string
+  minutes: number
 }

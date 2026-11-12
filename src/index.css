@@ -190,3 +190,50 @@ table.periods { width: auto; min-width: 50%; }
 .modal p { margin: 0 0 1.25rem; font-size: 1.1rem; font-weight: 600; }
 .modal-actions { justify-content: flex-end; }
 .btn.destructive { background: var(--danger); border-color: var(--danger); }
+.settings { align-items: flex-end; gap: 1.25rem; }
+.check { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; font-weight: 600; min-height: 44px; }
+.check input { width: 1.4rem; height: 1.4rem; min-height: 0; }
+
+/* ---------- Lineups / playing time ---------- */
+.lineup-modal { max-width: 560px; }
+.lineup-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.5rem; }
+.lineup-chip { border: 2px solid var(--border); background: #fff; border-radius: 12px; min-height: 52px; text-align: left; padding: 0.4rem 0.7rem; font-weight: 600; }
+.lineup-chip .num { font-weight: 800; margin-right: 0.25rem; }
+.lineup-chip.on { border-color: var(--made); background: #ebfbee; }
+.lineup-count { margin: 0.75rem 0; font-weight: 700; color: var(--warn); }
+.lineup-count.ok { color: var(--made); }
+.lineup-count.bad { color: var(--danger); }
+.spacer { flex: 1; }
+
+.floor-bar { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; padding: 0.5rem 0.75rem 0; }
+.floor-bar .label { font-weight: 700; font-size: 0.9rem; color: var(--muted); }
+.seg-btn { border: 2px solid var(--border); background: #fff; border-radius: 10px; min-height: 44px; padding: 0.3rem 0.8rem; text-align: left; }
+.seg-btn .seg-name { font-weight: 800; display: block; font-size: 0.95rem; }
+.seg-btn .seg-sub { font-size: 0.75rem; color: var(--muted); }
+.seg-btn.active { border-color: var(--made); box-shadow: 0 0 0 3px #d3f9d8; }
+.seg-btn.unset .seg-sub { color: var(--warn); font-weight: 700; }
+.seg-btn.irregular .seg-sub { color: var(--danger); font-weight: 700; }
+.seg-btn.edit { border-style: dashed; color: var(--muted); }
+
+.player.on-floor { border-color: var(--made); }
+.player .on-badge { position: absolute; top: 6px; right: 8px; font-size: 0.65rem; font-weight: 800; color: #fff; background: var(--made); border-radius: 6px; padding: 1px 5px; }
+.player { position: relative; }
+.player .mins { font-size: 0.72rem; font-weight: 700; }
+.mins.met { color: var(--made); }
+.mins.on-track { color: var(--muted); }
+.mins.at-risk { color: var(--warn); }
+.mins.short { color: var(--danger); }
+
+.pt-alert { border-radius: 12px; padding: 0.75rem 1rem; margin-bottom: 1rem; font-weight: 600; }
+.pt-alert.bad { background: #fff5f5; border: 1px solid #ffc9c9; color: #c92a2a; }
+.pt-alert.good { background: #ebfbee; border: 1px solid #b2f2bb; color: #2b8a3e; }
+.pt-alert.warn { background: #fff9db; border: 1px solid #ffe066; color: #e67700; }
+.pt-alert ul { margin: 0.35rem 0 0; padding-left: 1.2rem; font-weight: 400; }
+.pt td.dot { color: var(--made); font-size: 1.1rem; }
+.pt td.empty-seg { color: #ced4da; }
+.pt tr.short td { background: #fff5f5; }
+.pt th.unset { color: var(--warn); }
+.pt .status.met { color: var(--made); font-weight: 700; }
+.pt .status.short { color: var(--danger); font-weight: 700; }
+.pt .status.at-risk { color: var(--warn); font-weight: 700; }
+.box td.short-count { color: var(--danger); font-weight: 800; }

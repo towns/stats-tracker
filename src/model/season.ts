@@ -1,4 +1,5 @@
 import type { Game, Id, Player, Team } from './types'
+import { playingTime } from './playingTime'
 import { BOX_COLUMNS, addLines, boxScore, emptyLine, scaleLine, type StatLine } from './stats'
 
 export type Result = 'W' | 'L' | 'T'
@@ -15,6 +16,12 @@ export interface PlayerSeason {
   player: Player
   gp: number
   totals: StatLine
+  /** Minutes played, from games where lineups were recorded. */
+  minutes: number
+  /** Games with lineups recorded that this player was on the roster for. */
+  trackedGames: number
+  /** Final games where the player fell short of half the game. */
+  shortGames: number
 }
 
 export interface SeasonSummary {
@@ -41,6 +48,8 @@ export function seasonSummary(games: Game[], team?: Team): SeasonSummary {
 
   for (const game of sorted) {
     const box = boxScore(game)
+    const pt = playingTime(game)
+    const tracked = Object.keys(game.lineups ?? {}).length > 0
     teamLine = addLines(teamLine, box.team)
     oppLine = addLines(oppLine, box.opponent)
     const us = box.team.pts
@@ -51,10 +60,14 @@ export function seasonSummary(games: Game[], team?: Team): SeasonSummary {
     })
     for (const p of game.roster) {
       const prev = players.get(p.id)
+      const time = pt.players.find((x) => x.player.id === p.id)
       players.set(p.id, {
         player: p,
         gp: (prev?.gp ?? 0) + 1,
         totals: addLines(prev?.totals ?? emptyLine(), box.players[p.id]),
+        minutes: (prev?.minutes ?? 0) + (tracked ? time?.minutes ?? 0 : 0),
+        trackedGames: (prev?.trackedGames ?? 0) + (tracked ? 1 : 0),
+        shortGames: (prev?.shortGames ?? 0) + (tracked && game.status === 'final' && time?.status === 'short' ? 1 : 0),
       })
     }
   }

@@ -9,6 +9,8 @@ export default function NewGame({ store, teamId }: { store: Store; teamId?: stri
   const [opponent, setOpponent] = useState('')
   const [date, setDate] = useState(today)
   const [format, setFormat] = useState<'Q' | 'H'>('Q')
+  const [periodMinutes, setPeriodMinutes] = useState('6')
+  const [split, setSplit] = useState(true)
   const [present, setPresent] = useState<Set<string>>(() => new Set(team?.players.map((p) => p.id)))
 
   if (!team) return <div className="page"><a href="#/">‹ Home</a><p>Team not found.</p></div>
@@ -24,7 +26,15 @@ export default function NewGame({ store, teamId }: { store: Store; teamId?: stri
     const roster = team.players
       .filter((p) => present.has(p.id))
       .sort((a, b) => Number(a.number) - Number(b.number) || a.number.localeCompare(b.number))
-    const game = store.createGame(team, opponent.trim() || 'Opponent', date, format === 'Q' ? 4 : 2, format, roster)
+    const game = store.createGame(team, {
+      opponent: opponent.trim() || 'Opponent',
+      date,
+      periodCount: format === 'Q' ? 4 : 2,
+      periodLabel: format,
+      periodMinutes: Number(periodMinutes) || 6,
+      splitFirstHalf: format === 'Q' && split,
+      roster,
+    })
     go(`/game/${game.id}`)
   }
 
@@ -48,6 +58,18 @@ export default function NewGame({ store, teamId }: { store: Store; teamId?: stri
           <button className={format === 'Q' ? 'on' : ''} onClick={() => setFormat('Q')}>4 quarters</button>
           <button className={format === 'H' ? 'on' : ''} onClick={() => setFormat('H')}>2 halves</button>
         </div>
+      </div>
+      <div className="row settings">
+        <label className="field">
+          {format === 'Q' ? 'Quarter' : 'Half'} length (min)
+          <input className="num" inputMode="numeric" value={periodMinutes} onChange={(e) => setPeriodMinutes(e.target.value)} />
+        </label>
+        {format === 'Q' && (
+          <label className="check">
+            <input type="checkbox" checked={split} onChange={(e) => setSplit(e.target.checked)} />
+            Split Q1 &amp; Q2 into two sub segments
+          </label>
+        )}
       </div>
       <div className="field">
         Who's playing today? <span className="muted">(tap to toggle)</span>

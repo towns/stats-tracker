@@ -4,6 +4,8 @@ import type { Game, GameEvent, StatKind } from '../model/types'
 import { KIND_LABEL, boxScore, periodName, playerFouls, score, teamFouls } from '../model/stats'
 import { go } from '../nav'
 import { useConfirm } from '../useConfirm'
+import { PLAYERS_ON_FLOOR, formatMinutes, playingTime } from '../model/playingTime'
+import LineupModal from './LineupModal'
 
 type Target = string | 'team' | null
 
@@ -38,6 +40,26 @@ export default function LiveGame({ store, game }: { store: Store; game: Game }) 
   const toastTimer = useRef<number | undefined>(undefined)
   const box = boxScore(game)
   const period = game.currentPeriod
+  const pt = playingTime(game)
+  const lineups = game.lineups ?? {}
+  const periodSegments = pt.segments.filter((s) => s.period === period)
+  const [editingSeg, setEditingSeg] = useState<string | null>(null)
+  const [chosenSeg, setChosenSeg] = useState<string | null>(null)
+  // Default to the latest segment in this period that has a lineup recorded.
+  const activeSeg =
+    periodSegments.find((s) => s.id === chosenSeg) ??
+    [...periodSegments].reverse().find((s) => lineups[s.id]) ??
+    periodSegments[0]
+  const floor = new Set(activeSeg ? lineups[activeSeg.id] ?? [] : [])
+  const timeFor = (id: string) => pt.players.find((p) => p.player.id === id)
+  const editing = pt.segments.find((s) => s.id === editingSeg)
+  const editingIdx = editing ? pt.segments.indexOf(editing) : -1
+  const prevSeg = editingIdx > 0 ? pt.segments[editingIdx - 1] : undefined
+
+  const tapSegment = (id: string) => {
+    if (!lineups[id] || activeSeg?.id === id) setEditingSeg(id)
+    setChosenSeg(id)
+  }
 
   useEffect(() => () => window.clearTimeout(toastTimer.current), [])
 
@@ -124,6 +146,25 @@ export default function LiveGame({ store, game }: { store: Store; game: Game }) 
 
       {game.status === 'final' && <div className="banner">This game is final. Edits still allowed.</div>}
 
+      {periodSegments.length > 0 && (
+        <div className="floor-bar">
+          <span className="label">On the floor:</span>
+          {periodSegments.map((s) => {
+            const ids = lineups[s.id]
+            const cls = !ids ? 'unset' : ids.length !== PLAYERS_ON_FLOOR ? 'irregular' : ''
+            return (
+              <button key={s.id} className={`seg-btn ${cls} ${activeSeg?.id === s.id ? 'active' : ''}`} onClick={() => tapSegment(s.id)}>
+                <span className="seg-name">{s.label}</span>
+                <span className="seg-sub">{ids ? `${ids.length} players · ${s.minutes} min` : 'Tap to set lineup'}</span>
+              </button>
+            )
+          })}
+          {activeSeg && lineups[activeSeg.id] && (
+            <button className="seg-btn edit" onClick={() => setEditingSeg(activeSeg.id)}>Edit {activeSeg.label}</button>
+          )}
+        </div>
+      )}
+
       <main className="live-body">
         <section className="players">
           <div className="hint">
@@ -137,15 +178,18 @@ export default function LiveGame({ store, game }: { store: Store; game: Game }) 
             {game.roster.map((p) => {
               const line = box.players[p.id]
               const pf = playerFouls(game, p.id)
+              const t = timeFor(p.id)
               return (
                 <button
                   key={p.id}
-                  className={`player ${target === p.id ? 'selected' : ''} ${pending ? 'awaiting' : ''} ${pf >= 5 ? 'out' : pf >= 4 ? 'danger' : ''}`}
+                  className={`player ${floor.has(p.id) ? 'on-floor' : ''} ${target === p.id ? 'selected' : ''} ${pending ? 'awaiting' : ''} ${pf >= 5 ? 'out' : pf >= 4 ? 'danger' : ''}`}
                   onClick={() => tapPlayer(p.id)}
                 >
                   <span className="num">{p.number}</span>
                   <span className="name">{p.name}</span>
                   <span className="mini">{line.pts} pts · {line.reb} reb · <b>{pf} PF</b></span>
+                  {t && <span className={`mins ${t.status}`}>{formatMinutes(t.minutes)}/{formatMinutes(t.target)} min</span>}
+                  {floor.has(p.id) && <span className="on-badge">ON</span>}
                 </button>
               )
             })}
@@ -201,6 +245,21 @@ export default function LiveGame({ store, game }: { store: Store; game: Game }) 
 
       {toast && <div className="toast">{toast}</div>}
       {confirmDialog}
+      {editing && (
+        <LineupModal
+          key={editing.id}
+          segment={editing}
+          roster={game.roster}
+          initial={lineups[editing.id] ?? []}
+          previous={prevSeg && lineups[prevSeg.id] ? { segment: prevSeg, players: lineups[prevSeg.id] } : undefined}
+          onClose={() => setEditingSeg(null)}
+          onSave={(ids) => {
+            store.setLineup(game.id, editing.id, ids)
+            setEditingSeg(null)
+            setChosenSeg(editing.id)
+          }}
+        />
+      )}
     </div>
   )
 }

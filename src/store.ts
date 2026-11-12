@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { Game, GameEvent, Id, Player, Side, StatKind, Team } from './model/types'
+import type { Game, GameEvent, Id, Side, StatKind, Team } from './model/types'
 
 const KEY = 'stats-tracker:v1'
 
@@ -31,6 +31,11 @@ export function demoTeam(): Team {
   }
 }
 
+export type GameSettings = Pick<
+  Game,
+  'opponent' | 'date' | 'periodCount' | 'periodLabel' | 'periodMinutes' | 'splitFirstHalf' | 'roster'
+>
+
 export function useStore() {
   const [state, setState] = useState<AppState>(load)
 
@@ -52,10 +57,10 @@ export function useStore() {
           : [...s.teams, team],
       })),
     deleteTeam: (id: Id) => setState((s) => ({ ...s, teams: s.teams.filter((t) => t.id !== id) })),
-    createGame: (team: Team, opponent: string, date: string, periodCount: number, periodLabel: 'Q' | 'H', roster: Player[]): Game => {
+    createGame: (team: Team, settings: GameSettings): Game => {
       const game: Game = {
-        id: newId(), teamId: team.id, teamName: team.name, opponent, date,
-        periodCount, periodLabel, currentPeriod: 1, roster, events: [], status: 'live',
+        id: newId(), teamId: team.id, teamName: team.name, currentPeriod: 1, events: [], status: 'live',
+        lineups: {}, ...settings,
       }
       setState((s) => ({ ...s, games: [game, ...s.games] }))
       return game
@@ -71,6 +76,13 @@ export function useStore() {
       updateGame(gameId, (g) => ({ ...g, events: g.events.filter((e) => e.id !== eventId) })),
     setPeriod: (gameId: Id, period: number) =>
       updateGame(gameId, (g) => ({ ...g, currentPeriod: Math.max(1, period) })),
+    setLineup: (gameId: Id, segmentId: string, playerIds: Id[]) =>
+      updateGame(gameId, (g) => {
+        const lineups = { ...g.lineups }
+        if (playerIds.length) lineups[segmentId] = playerIds
+        else delete lineups[segmentId]
+        return { ...g, lineups }
+      }),
     setStatus: (gameId: Id, status: Game['status']) =>
       updateGame(gameId, (g) => ({ ...g, status })),
   }

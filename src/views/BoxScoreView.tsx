@@ -1,5 +1,6 @@
 import type { Store } from '../store'
 import type { Game } from '../model/types'
+import PlayingTimeSection from './PlayingTimeSection'
 import { BOX_COLUMNS, boxScore, boxScoreCsv, periodName, score, type StatLine } from '../model/stats'
 
 export default function BoxScoreView({ game }: { store: Store; game: Game }) {
@@ -92,6 +93,8 @@ export default function BoxScoreView({ game }: { store: Store; game: Game }) {
           </tfoot>
         </table>
       </div>
+
+      <PlayingTimeSection game={game} />
     </div>
   )
 }
