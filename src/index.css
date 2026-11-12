@@ -174,3 +174,12 @@ table.periods { width: auto; min-width: 50%; }
   .page-header .row, .back { display: none; }
   .table-wrap { border: 0; }
 }
+
+/* ---------- Season ---------- */
+.leaders { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.6rem; margin-bottom: 0.5rem; }
+.leader { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 0.75rem 1rem; }
+.leader-val { font-size: 1.8rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.result { font-weight: 800; }
+.result.W { color: var(--made); }
+.result.L { color: var(--danger); }
+.result.live { color: var(--danger); font-size: 0.8rem; }

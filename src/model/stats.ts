@@ -174,3 +174,16 @@ export function boxScoreCsv(game: Game): string {
   ]
   return rows.join('\n') + '\n'
 }
+
+export function addLines(a: StatLine, b: StatLine): StatLine {
+  const out = { ...a }
+  for (const k of Object.keys(out) as (keyof StatLine)[]) out[k] += b[k]
+  return out
+}
+
+export function scaleLine(l: StatLine, divisor: number): StatLine {
+  const out = { ...l }
+  if (divisor === 0) return out
+  for (const k of Object.keys(out) as (keyof StatLine)[]) out[k] = l[k] / divisor
+  return out
+}

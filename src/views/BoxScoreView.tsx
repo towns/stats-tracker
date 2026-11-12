@@ -15,7 +15,8 @@ export default function BoxScoreView({ game }: { store: Store; game: Game }) {
     URL.revokeObjectURL(a.href)
   }
 
-  const cells = (l: StatLine) => BOX_COLUMNS.map(([h, f]) => <td key={h}>{f(l)}</td>)
+  const cells = (l: StatLine, opp = false) =>
+    BOX_COLUMNS.map(([h, f]) => <td key={h}>{opp && h.endsWith('%') ? '–' : f(l)}</td>)
 
   return (
     <div className="page">
@@ -86,7 +87,7 @@ export default function BoxScoreView({ game }: { store: Store; game: Game }) {
             <tr className="opp-row">
               <td />
               <td className="name">{game.opponent}</td>
-              {cells(box.opponent)}
+              {cells(box.opponent, true)}
             </tr>
           </tfoot>
         </table>

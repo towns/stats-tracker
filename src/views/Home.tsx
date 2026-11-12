@@ -27,10 +27,13 @@ export default function Home({ store }: { store: Store }) {
             <li key={t.id} className="card">
               <div>
                 <strong>{t.name}</strong>
-                <div className="muted">{t.players.length} players</div>
+                <div className="muted">
+                  {t.players.length} players · {games.filter((g) => g.teamId === t.id).length} games
+                </div>
               </div>
               <div className="row">
                 <a className="btn secondary" href={`#/team/${t.id}`}>Roster</a>
+                <a className="btn secondary" href={`#/season/${t.id}`}>Season</a>
                 <a className="btn" href={`#/new-game/${t.id}`}>Start game</a>
               </div>
             </li>

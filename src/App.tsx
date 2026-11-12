@@ -5,6 +5,7 @@ import TeamEditor from './views/TeamEditor'
 import NewGame from './views/NewGame'
 import LiveGame from './views/LiveGame'
 import BoxScoreView from './views/BoxScoreView'
+import SeasonView from './views/SeasonView'
 
 function useHashRoute(): string[] {
   const parse = () => window.location.hash.replace(/^#\/?/, '').split('/').filter(Boolean)
@@ -22,6 +23,7 @@ export default function App() {
   const [section, id, sub] = useHashRoute()
 
   if (section === 'team') return <TeamEditor store={store} teamId={id} />
+  if (section === 'season') return <SeasonView store={store} teamId={id} />
   if (section === 'new-game') return <NewGame store={store} teamId={id} />
   if (section === 'game' && id) {
     const game = store.state.games.find((g) => g.id === id)
