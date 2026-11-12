@@ -3,6 +3,7 @@ import type { Store } from '../store'
 import type { Game, GameEvent, StatKind } from '../model/types'
 import { KIND_LABEL, boxScore, periodName, playerFouls, score, teamFouls } from '../model/stats'
 import { go } from '../nav'
+import { useConfirm } from '../useConfirm'
 
 type Target = string | 'team' | null
 
@@ -33,6 +34,7 @@ export default function LiveGame({ store, game }: { store: Store; game: Game }) 
   const [target, setTarget] = useState<Target>(null)
   const [pending, setPending] = useState<StatKind | null>(null)
   const [toast, setToast] = useState<string | null>(null)
+  const [confirmDialog, askConfirm] = useConfirm()
   const toastTimer = useRef<number | undefined>(undefined)
   const box = boxScore(game)
   const period = game.currentPeriod
@@ -111,7 +113,7 @@ export default function LiveGame({ store, game }: { store: Store; game: Game }) 
         <div className="header-actions">
           <a className="btn secondary" href={`#/game/${game.id}/box`}>Box score</a>
           {game.status === 'live' ? (
-            <button className="btn" onClick={() => { if (confirm('End game?')) { store.setStatus(game.id, 'final'); go(`/game/${game.id}/box`) } }}>
+            <button className="btn" onClick={() => askConfirm('End this game and mark it final?', () => { store.setStatus(game.id, 'final'); go(`/game/${game.id}/box`) }, { confirmLabel: 'End game' })}>
               End game
             </button>
           ) : (
@@ -198,6 +200,7 @@ export default function LiveGame({ store, game }: { store: Store; game: Game }) 
       </main>
 
       {toast && <div className="toast">{toast}</div>}
+      {confirmDialog}
     </div>
   )
 }

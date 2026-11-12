@@ -1,8 +1,10 @@
 import { demoTeam, type Store } from '../store'
 import { score } from '../model/stats'
+import { useConfirm } from '../useConfirm'
 
 export default function Home({ store }: { store: Store }) {
   const { teams, games } = store.state
+  const [confirmDialog, askConfirm] = useConfirm()
   return (
     <div className="page">
       <header className="page-header">
@@ -59,7 +61,7 @@ export default function Home({ store }: { store: Store }) {
                 <a className="btn" href={`#/game/${g.id}`}>{g.status === 'live' ? 'Resume' : 'Open'}</a>
                 <button
                   className="btn ghost"
-                  onClick={() => confirm(`Delete game vs ${g.opponent}?`) && store.deleteGame(g.id)}
+                  onClick={() => askConfirm(`Delete game vs ${g.opponent}? This can't be undone.`, () => store.deleteGame(g.id), { confirmLabel: 'Delete', danger: true })}
                 >
                   Delete
                 </button>
@@ -68,6 +70,7 @@ export default function Home({ store }: { store: Store }) {
           ))}
         </ul>
       </section>
+      {confirmDialog}
     </div>
   )
 }

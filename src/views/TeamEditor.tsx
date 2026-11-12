@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { newId, type Store } from '../store'
 import type { Player, Team } from '../model/types'
 import { go } from '../nav'
+import { useConfirm } from '../useConfirm'
 
 export default function TeamEditor({ store, teamId }: { store: Store; teamId?: string }) {
   const existing = store.state.teams.find((t) => t.id === teamId)
@@ -10,6 +11,7 @@ export default function TeamEditor({ store, teamId }: { store: Store; teamId?: s
   )
   const [number, setNumber] = useState('')
   const [name, setName] = useState('')
+  const [confirmDialog, askConfirm] = useConfirm()
 
   const addPlayer = (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,17 +72,18 @@ export default function TeamEditor({ store, teamId }: { store: Store; teamId?: s
         {existing && (
           <button
             className="btn ghost danger"
-            onClick={() => {
-              if (confirm(`Delete ${existing.name}? Past games are kept.`)) {
+            onClick={() =>
+              askConfirm(`Delete ${existing.name}? Past games are kept.`, () => {
                 store.deleteTeam(existing.id)
                 go('/')
-              }
-            }}
+              }, { confirmLabel: 'Delete', danger: true })
+            }
           >
             Delete team
           </button>
         )}
       </div>
+      {confirmDialog}
     </div>
   )
 }
