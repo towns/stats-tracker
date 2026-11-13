@@ -1,10 +1,34 @@
-import { demoTeam, type Store } from '../store'
+import { useRef } from 'react'
+import { demoTeam, parseBackup, type Store } from '../store'
 import { score } from '../model/stats'
 import { useConfirm } from '../useConfirm'
 
 export default function Home({ store }: { store: Store }) {
   const { teams, games } = store.state
   const [confirmDialog, askConfirm] = useConfirm()
+  const fileInput = useRef<HTMLInputElement>(null)
+
+  const backup = () => {
+    const blob = new Blob([JSON.stringify(store.state, null, 2)], { type: 'application/json' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `stat-tracker-backup-${new Date().toLocaleDateString('en-CA')}.json`
+    a.click()
+    URL.revokeObjectURL(a.href)
+  }
+
+  const restore = async (file: File) => {
+    try {
+      const data = parseBackup(await file.text())
+      askConfirm(
+        `Replace all data on this device with the backup (${data.teams.length} teams, ${data.games.length} games)?`,
+        () => store.replaceState(data),
+        { confirmLabel: 'Restore', danger: true },
+      )
+    } catch (e) {
+      askConfirm(`Couldn't read that file: ${(e as Error).message}`, () => {}, { confirmLabel: 'OK' })
+    }
+  }
   return (
     <div className="page">
       <header className="page-header">
@@ -69,6 +93,27 @@ export default function Home({ store }: { store: Store }) {
             </li>
           ))}
         </ul>
+      </section>
+      <section className="data-section">
+        <h2>Your data</h2>
+        <p className="muted">
+          Stats are saved only on this device. Back up regularly, or to move data to another device.
+        </p>
+        <div className="row">
+          <button className="btn secondary" onClick={backup}>Download backup</button>
+          <button className="btn secondary" onClick={() => fileInput.current?.click()}>Restore from backup</button>
+          <input
+            ref={fileInput}
+            type="file"
+            accept="application/json,.json"
+            hidden
+            onChange={(e) => {
+              const f = e.target.files?.[0]
+              if (f) restore(f)
+              e.target.value = ''
+            }}
+          />
+        </div>
       </section>
       {confirmDialog}
     </div>

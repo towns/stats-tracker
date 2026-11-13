@@ -21,6 +21,12 @@ function load(): AppState {
   return { teams: [], games: [] }
 }
 
+export function parseBackup(text: string): AppState {
+  const data = JSON.parse(text) as Partial<AppState>
+  if (!Array.isArray(data.teams) || !Array.isArray(data.games)) throw new Error('Not a Stat Tracker backup file')
+  return { teams: data.teams, games: data.games }
+}
+
 export function demoTeam(): Team {
   const names = ['Ava', 'Bella', 'Chloe', 'Daisy', 'Emma', 'Fiona', 'Grace', 'Hannah', 'Isla', 'Julia']
   const nums = ['3', '5', '10', '11', '12', '14', '21', '22', '24', '33']
@@ -49,6 +55,7 @@ export function useStore() {
 
   return {
     state,
+    replaceState: (next: AppState) => setState(next),
     saveTeam: (team: Team) =>
       setState((s) => ({
         ...s,
